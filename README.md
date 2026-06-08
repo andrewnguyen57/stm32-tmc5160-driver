@@ -6,3 +6,4 @@ Work-in-progress STM32 driver for the TMC5160 stepper motor driver, developed to
 
 ### Documentation
 - [TMC5160 Datasheet](docs/tmc5160a_datasheet_rev1.17.pdf)
+
