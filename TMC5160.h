@@ -1,46 +1,34 @@
-/*
-Reference TMC5160 Datasheet pg 32 - pg 49*/
-
 #ifndef TMC5160_H
 #define TMC5160_H
 
-// --- Registers ---
+#include "TMC5160_Config.h"
+#include "stm32f4xx_hal.h"
 
-// -- Global Configs --
-#define TMC_GCONF   0x00 // Global configuration flags
-#define TMC_GSTAT   0x01 // Global status flags
+// --- TypeDefs ---
+typedef struct {
+    // - SPI -
+    SPI_HandleTypeDef *hspi;
+    
+    // - CS -
+    GPIO_TypeDef *cs_port;
+    uint16_t cs_pin;
 
-// -- Current --
-#define TMC_IHOLD_IRUN  0x10 // Driver current control
-#define TMC_TPOWERDOWN  0x11 // Set delay time after stand still to power down (0-4s)
+    // - Register data -
+    // Keeps a copy of data written to the registers (because some registers are write only)
+    uint32_t reg_data[128]; // 512 bytes stored in RAM
 
-// -- Ramp Generator --
-#define TMC_RAMPMODE    0x20 // Ramp mode
-#define TMC_XACTUAL     0x21 // Actual motor position (signed)
-#define TMC_VSTART      0x23 // Motor start velocity
-#define TMC_A1          0x24 // First acceleration between VSTART and V1 (unsigned)
-#define TMC_V1          0x25 // First acceleration / deceleration phase threshole velocity (unsigned)
-#define TMC_AMAX        0x26 // Second acceleration between V1 and VMAX (unsigned)
-#define TMC_VMAX        0x27 // Motion ramp target velocity (for positioning ensure VMAX >= VSTART) (unsigned)
-#define TMC_DMAX        0x28 // Deceleration between VMAX and V1 (unsigned)
-#define TMC_D1          0x2A // Deceleration between V1 and VSTOP
-#define TMC_VSTOP       0x2B // Motor stop velocity (unsigned)
-#define TMC_XTARGET     0x2D // Target position for ramp mode (signed)
+    // - Current -
+    float r_sense; // TMC5160 board sense resistor (default = 0.075Ω)
+    uint16_t max_cur; // Rated current for motor in mA
 
-// -- Driver --
-#define TMC_CHOPCONF    0x6C // Chopper and Driver configuration
-#define TMC_COOLCONF    0x6D // CoolStep smart current control register and StallGuard2 configuration
-#define TMC_DRV_STATUS  0x6F // StallGuard2 value and driver error flags
-#define TMC_PWMCONF     0x70 // Voltage PWM mode chopper configuration
+} TMC5160_TypeDef;
 
-// -- TMC5160 -- 
-#define SHORT_CONF  0x09 // Short circuit protection configuration
-#define DRV_CONF    0x0A // Driver configuration
-#define GLOBAL_SCALER 0x0B // Global scaling of Motor current
+// --- API ---
+// -- Register --
+void TMC5160_WriteRegister(TMC5160_TypeDef *htmc, uint8_t reg_address, uint32_t data);
+uint32_t TMC5160_ReadRegister(TMC5160_TypeDef *htmc, uint8_t reg_address);
 
-// --- Prototypes ---
-void tmc_spi_write(uint8_t reg_address, uint32_t data);
-uint32_t tmc_spi_read(uint8_t reg_address);
+// -- TMC5160 --
+void TMC5160_Init(TMC5160_TypeDef *htmc);
 
 #endif
-

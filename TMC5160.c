@@ -1,46 +1,101 @@
+/** 
+* @file TMC5160.c
+* @brief TMC5160 Stepper Driver Library
+*
+* Author: Andrew Nguyen
+* Date: June 2026
+*
+* References:
+* Trinamic TMC5160 Datasheet (see docs)
+* Relevant datasheet page numbers are cited throughout the source code.
+*/
+
 #include "TMC5160.h"
 
+// --- REGISTER CONFIGURATION ---
+// -- Write to register --
+void TMC5160_WriteRegister(TMC5160_TypeDef *htmc, uint8_t reg_address, uint32_t data) 
+{
+    // Store the written data for later use
+    htmc->reg_data[reg_address] = data;
 
-// --- SPI COMMUNICATION ---
-// -- Write to driver using spi --
-void tmc_spi_write(uint8_t reg_address, uint32_t data)
-{   
-    uint8_t tx[5]; // an array of 5 bytes
-
-    tx[0] = reg_address | 0x80 ;
-    tx[1] = (data >> 24) & 0xFF; 
-    tx[2] = (data >> 16) & 0xFF;
-    tx[3] = (data >> 8) & 0xFF;
-    tx[4] = (data >> 0) & 0xFF;
-    // Set (OR |) with 0x80 is to set the 7th bit to 1 means to set the register to write mode
-    // Mask (AND &) with 0xFF means to keep only the last 8 LSB to ensure no garbage
-
-    HAL_GPIO_WritePin(TMC_GPIO_Port, TMC_CS_Pin, GPIO_PIN_RESET); // Pull CS pin low
-    HAL_SPI_Transmit(&hspi1, tx, 5, HAL_MAX_DELAY); // Transmit data over SPI
-    HAL_GPIO_WritePin(TMC_GPIO_Port, TMC_CS_Pin, GPIO_PIN_SET); // Pull CS pin high
+    // Write data to the register address using SPI
+    TMC5160_SPI_Write(htmc, reg_address, data);
 }
 
-// -- Read from driver using spi --
-uint32_t tmc_spi_read(uint8_t reg_address)
+// -- Read from register --
+uint32_t TMC5160_ReadRegister(TMC5160_TypeDef *htmc, uint8_t reg_address)
 {
-    uint8_t tx[5] = {reg_address & 0x7F, 0, 0, 0, 0}; // an array of 5 bytes with the register address
-    // Mask with 0x7F clears 7th bit to make sure it is in read mode
-    uint8_t rx[5]; // an array of 5 bytes
+    // Read data from the register address using SPI
+    uint32_t data = TMC5160_SPI_Read(htmc, reg_address);
 
-    // First transaction - TMC5160 gets the address but returns garbage
-    HAL_GPIO_WritePin(TMC_GPIO_Port, TMC_CS_Pin, GPIO_PIN_RESET); // Pull CS pin low
-    HAL_SPI_TransmitReceive(&hspi1, tx, rx, 5, HAL_MAX_DELAY); // Transmit and receive data over SPI
-    HAL_GPIO_WritePin(TMC_GPIO_Port, TMC_CS_Pin, GPIO_PIN_SET); // Pull CS pin high
-
-    // Second transcation - TMC5160 returns actual data
-    HAL_GPIO_WritePin(TMC_GPIO_Port, TMC_CS_Pin, GPIO_PIN_RESET); // Pull CS pin low
-    HAL_SPI_TransmitReceive(&hspi1, tx, rx, 5, HAL_MAX_DELAY); // Transmit and receive data over SPI
-    HAL_GPIO_WritePin(TMC_GPIO_Port, TMC_CS_Pin, GPIO_PIN_SET); // Pull CS pin high
-
-    // Using the data received from driver to reassemble and return it
-    uint32_t data = (uint32_t) rx[1] << 24 | (uint32_t) rx[2] << 16 | (uint32_t) rx[3] << 8 | (uint32_t) rx[4] << 0;
-    
     return data;
 }
 
+void TMC5160_SetCurrent(TMC5160_TypeDef *htmc)
+{
+    // Manually set current
+    // CS = 32 * SQRT_TWO * (htmc->motor_current/1000.0f) * (htmc->r_sense + 0.02f) / 0.325f - 1
+}
 
+void TMC5160_Init(TMC5160_TypeDef *htmc)
+{   
+    HAL_Delay(1000);
+
+    // Setup motor direction (pg 32 & 33)
+    TMC5160_WriteRegister(htmc, TMC5160_GCONF, (0 << 4)); // Default = 0 , Inverse = 1
+
+    // Setup Chopper Configuration as Default (pg 51)
+    TMC5160_WriteRegister(htmc, TMC5160_CHOPCONF, 
+        (1 << 15) | // TBL = 1   
+        (4 << 7)  | // HEND = 4
+        (0 << 4)  | // HSTRT = 0
+        (4 << 0));  // TOFF = 4
+
+    // Setup Global Scaler of Motor Current (pg 36)
+    TMC5160_WriteRegister(htmc, TMC5160_GLOBAL_SCALER, 0x00000000); // Default = 0 (Full Scale 256)
+
+    // Setup default running and hold current (pg 38 & 74)
+    // For Rsense = 0.075Ω; Imax = 3.1A (31 = 3.1);
+    TMC5160_WriteRegister(htmc, TMC5160_IHOLD_IRUN, 
+    (6 << 0) | // IHOLD = 6 (50% of IRUN)
+    (12 << 8)  | // IRUN = 12 (use 1A as default, change later)
+    (6 << 16)); // IHOLDDELAY = 6 (50% of IRUN)
+    
+    // Setup delay time after stand still before power down (pg 38)
+    TMC5160_WriteRegister(htmc, TMC5160_TPOWERDOWN, 0x0000000A); // Default = 10
+
+    // Setup Ramp Mode (pg 40) 
+    TMC5160_WriteRegister(htmc, TMC5160_RAMPMODE, 0x00000000); // Default = 0 (position mode)
+
+    // Setup starting velocity before acceleration
+    TMC5160_WriteRegister(htmc, TMC5160_VSTART, 0x00000001); // Default = 1
+
+    // Setup first acceleration rate
+    TMC5160_WriteRegister(htmc, TMC5160_A1, 0x0000003E8); // Default = 1000
+
+    // Setup velocity threshold between A1 and AMAX
+    TMC5160_WriteRegister(htmc, TMC5160_V1, 0x0000C350); // Default = 50000
+
+    // Setup maximum acceleration
+    TMC5160_WriteRegister(htmc, TMC5160_AMAX, 0x0000001F4); // Default = 500
+
+    // Setup maximum velocity
+    TMC5160_WriteRegister(htmc, TMC5160_VMAX, 0x00030D40); // Default = 200000
+
+    // Setup maximum deceleration
+    TMC5160_WriteRegister(htmc, TMC5160_DMAX, 0x0000002BC); // Default = 700
+
+    // Setup final deceleration before VSTOP
+    TMC5160_WriteRegister(htmc, TMC5160_D1, 0x00000578); // Default = 1400
+
+    // Setup stop velocity
+    TMC5160_WriteRegister(htmc, TMC5160_VSTOP, 0x0000000A); // Default = 10
+
+    // -- Position --
+    // Setup actual position
+    TMC5160_WriteRegister(htmc, TMC5160_XACTUAL, 0x00000000); // Default = 0
+    
+    // Setup target position
+    TMC5160_WriteRegister(htmc, TMC5160_XTARGET, 0x00000000); // Default = 0
+}
