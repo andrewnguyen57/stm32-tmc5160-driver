@@ -1,0 +1,2 @@
+../Core/Src/TMC5160_SPI.c:17:6:TMC5160_SPI_Write	1
+../Core/Src/TMC5160_SPI.c:37:10:TMC5160_SPI_Read	1
