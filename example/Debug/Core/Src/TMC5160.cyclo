@@ -1,0 +1,11 @@
+../Core/Src/TMC5160.c:20:6:TMC5160_WriteRegister	1
+../Core/Src/TMC5160.c:30:10:TMC5160_ReadRegister	1
+../Core/Src/TMC5160.c:38:6:TMC5160_SetCurrent	2
+../Core/Src/TMC5160.c:58:6:TMC5160_MoveTo	1
+../Core/Src/TMC5160.c:74:6:TMC5160_Init	1
+../Core/Src/TMC5160.c:137:6:TMC5160_EN_Enable	1
+../Core/Src/TMC5160.c:142:6:TMC5160_EN_Disable	1
+../Core/Src/TMC5160.c:147:6:TMC5160_GetDrv	1
+../Core/Src/TMC5160.c:159:6:TMC5160_GetDrvStat	9
+../Core/Src/TMC5160.c:179:6:TMC5160_GetGStat	5
+../Core/Src/TMC5160.c:190:6:TMC5160_SetRampMode	5
