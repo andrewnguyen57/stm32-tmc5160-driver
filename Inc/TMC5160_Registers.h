@@ -4,18 +4,6 @@ Reference TMC5160 Datasheet pg 32 - pg 49*/
 #ifndef TMC5160_REGISTERS_H
 #define TMC5160_REGISTERS_H
 
-// -- DEFAULTS --
-// Default init values
-#define TMC5160_CHOPCONF_DEFAULT    0x10410154
-#define SQRT_TWO                    1.41421f
-
-// -- RAMP MODE --
-#define TMC5160_RAMPMODE_POS    0x00
-#define TMC5160_RAMPMODE_VEL1   0x01
-#define TMC5160_RAMPMODE_VEL2   0x02
-#define TMC5160_RAMPMODE_HOLD   0x03
-
-
 // --- REGISTERS ---
 // -- Global Configs --
 #define TMC5160_GCONF   0x00 // Global configuration flags
@@ -31,6 +19,7 @@ Reference TMC5160 Datasheet pg 32 - pg 49*/
 // -- Ramp Generator --
 #define TMC5160_RAMPMODE    0x20 // Ramp mode
 #define TMC5160_XACTUAL     0x21 // Actual motor position (signed)
+#define TMC5160_VACTUAL     0x22 // Actual velocity from ramp generator (signed)
 #define TMC5160_VSTART      0x23 // Motor start velocity
 #define TMC5160_A1          0x24 // First acceleration between VSTART and V1 (unsigned)
 #define TMC5160_V1          0x25 // First acceleration / deceleration phase threshole velocity (unsigned)
@@ -51,8 +40,6 @@ Reference TMC5160 Datasheet pg 32 - pg 49*/
 #define TMC5160_SHORT_CONF  0x09 // Short circuit protection configuration
 #define TMC5160_DRV_CONF    0x0A // Driver configuration
 #define TMC5160_GLOBAL_SCALER 0x0B // Global scaling of Motor current
-
-
 
 #endif
 

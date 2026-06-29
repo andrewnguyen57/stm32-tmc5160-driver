@@ -34,10 +34,6 @@
 
 	/* Private define ------------------------------------------------------------*/
 	/* USER CODE BEGIN PD */
-	#define PORT_DIR GPIOC
-	#define PIN_DIR GPIO_PIN_3
-	#define PORT_STEP GPIOC
-	#define PIN_STEP GPIO_PIN_2
 
 	/* USER CODE END PD */
 
@@ -52,14 +48,15 @@
 	UART_HandleTypeDef huart2;
 
 	/* USER CODE BEGIN PV */
-	TMC5160_TypeDef joint_test = {
+
+	// Setup motor
+	TMC5160_TypeDef htmc = {
 	  .hspi = &hspi1,
-	  .cs_port = GPIOB,
-	  .cs_pin = GPIO_PIN_6,
-	  .en_port = GPIOB,
-	  .en_pin = GPIO_PIN_5,
+	  .cs.port = GPIOB,
+	  .cs.pin = GPIO_PIN_6,
+	  .en.port = GPIOB,
+	  .en.pin = GPIO_PIN_5,
 	  .r_sense = 0.075f,
-	  .motor_current = 2000
 	};
 	/* USER CODE END PV */
 
@@ -109,16 +106,17 @@
 	  MX_USART2_UART_Init();
 	  MX_SPI1_Init();
 	  /* USER CODE BEGIN 2 */
-	  HAL_Delay(10);
-	  TMC5160_Init(&joint_test);
-	  TMC5160_EN_Enable(&joint_test);
-	  TMC5160_SetRampMode(&joint_test, 0);
-	  TMC5160_GetDrv(&joint_test, &huart2);
-	  TMC5160_SetCurrent(&joint_test);
 
-	  TMC5160_WriteRegister(&joint_test, TMC5160_A1, 5000);
-	  TMC5160_WriteRegister(&joint_test, TMC5160_AMAX, 5000);
+	  // Initialze the motor
+	  TMC5160_Init(&htmc);
+	  TMC5160_SetEN(&htmc, GPIO_PIN_RESET);
 
+	  // Debugging: This should return 0x30 at huart2
+	  TMC5160_IOIN_TypeDef ioin = TMC5160_GetIOIN(&htmc); // Check motor's driver information
+	  char buf[64];
+	  int len = snprintf(buf, sizeof(buf), "Driver: %u\r\n", ioin.version);
+	  HAL_UART_Transmit(&huart2, (uint8_t *)buf, len, HAL_MAX_DELAY);
+	  
 	  /* USER CODE END 2 */
 
 	  /* Infinite loop */
@@ -127,11 +125,10 @@
 	  {
 		/* USER CODE END WHILE */
 		/* USER CODE BEGIN 3 */
-		  TMC5160_MoveTo(&joint_test, 102400, &huart2);
+		  TMC5160_MoveTo(&motor, 25600); // Move to 180°
 		  HAL_Delay(2000);
-		  TMC5160_MoveTo(&joint_test, -102400, &huart2);
+		  TMC5160_MoveTo(&motor, 0); // Move to 0°
 		  HAL_Delay(2000);
-
 		/* USER CODE END 3 */
 	  }
 	}
