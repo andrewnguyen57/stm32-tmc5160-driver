@@ -85,6 +85,14 @@ typedef struct {
     uint16_t microstep;
 } TMC5160_TypeDef;
 
+// -- TMC5160 User Config --
+typedef struct {
+    SPI_HandleTypeDef *hspi;
+    GPIO_Pin_TypeDef cs;
+    GPIO_Pin_TypeDef en;
+    float r_sense;
+} TMC5160_Config_TypeDef;
+
 typedef struct {
     uint8_t version;
     uint8_t sd_mode;
@@ -115,8 +123,8 @@ uint32_t TMC5160_ReadRegister(TMC5160_TypeDef *htmc, uint8_t reg_address);
 
 // -- TMC5160 --
 // - Set -
-void TMC5160_Init(TMC5160_TypeDef *htmc);
-void TMC5160_SetEN(TMC5160_TypeDef *htmc, GPIO_PinState state);
+TMC5160_Status_TypeDef TMC5160_Init(TMC5160_TypeDef *htmc, const TMC5160_Config_TypeDef *cfg);
+TMC5160_Status_TypeDef TMC5160_SetEN(TMC5160_TypeDef *htmc, GPIO_PinState state);
 TMC5160_Status_TypeDef TMC5160_SetCurrent(TMC5160_TypeDef *htmc, uint16_t current_ma);
 TMC5160_Status_TypeDef TMC5160_SetRampMode(TMC5160_TypeDef *htmc, TMC5160_RampMode_TypeDef ramp_mode);
 TMC5160_Status_TypeDef TMC5160_SetMicrostep(TMC5160_TypeDef *htmc, uint16_t microstep);

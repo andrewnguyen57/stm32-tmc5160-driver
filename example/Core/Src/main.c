@@ -37,7 +37,7 @@
 
 	/* USER CODE END PD */
 
-	/* Private macro -------------------------------------------------------------*/
+	/* Private macro -----------	--------------------------------------------------*/
 	/* USER CODE BEGIN PM */
 
 	/* USER CODE END PM */
@@ -50,12 +50,11 @@
 	/* USER CODE BEGIN PV */
 
 	// Setup motor
-	TMC5160_TypeDef htmc = {
+	TMC5160_TypeDef htmc;
+	const TMC5160_Config_TypeDef htmc_cfg = {
 	  .hspi = &hspi1,
-	  .cs.port = GPIOB,
-	  .cs.pin = GPIO_PIN_6,
-	  .en.port = GPIOB,
-	  .en.pin = GPIO_PIN_5,
+	  .cs = {.port = GPIOB, .pin = GPIO_PIN_6},
+	  .en = {.port = GPIOB, .pin = GPIO_PIN_5},
 	  .r_sense = 0.075f,
 	};
 	/* USER CODE END PV */
@@ -107,11 +106,18 @@
 	  MX_SPI1_Init();
 	  /* USER CODE BEGIN 2 */
 
-	  // Initialze the motor
-	  TMC5160_Init(&htmc);
-	  TMC5160_SetEN(&htmc, GPIO_PIN_RESET);
+	  // Initialize the motor
+	  if (TMC5160_Init(&htmc, &htmc_cfg) != TMC5160_OK)
+	  {
+		Error_Handler();
+	  }
+	  // Enable EN Pin
+	  if (TMC5160_SetEN(&htmc, GPIO_PIN_RESET) != TMC5160_OK)
+	  {
+		Error_Handler();
+	  }
 
-	  // Debugging: This should return 0x30 at huart2
+	  // Read the chip version (expected: 0x30 for the TMC5160)
 	  TMC5160_IOIN_TypeDef ioin = TMC5160_GetIOIN(&htmc); // Check motor's driver information
 	  char buf[64];
 	  int len = snprintf(buf, sizeof(buf), "Driver: %u\r\n", ioin.version);
@@ -125,9 +131,18 @@
 	  {
 		/* USER CODE END WHILE */
 		/* USER CODE BEGIN 3 */
-		  TMC5160_MoveTo(&motor, 25600); // Move to 180°
+		  // Move to 180°
+		  if (TMC5160_MoveTo(&htmc, 25600) != TMC5160_OK)	
+		  {
+			Error_Handler();
+		  }
 		  HAL_Delay(2000);
-		  TMC5160_MoveTo(&motor, 0); // Move to 0°
+
+		  // Move to 0°	 
+		  if (TMC5160_MoveTo(&htmc, 0) != TMC5160_OK)
+		  {
+			Error_Handler();
+		  }
 		  HAL_Delay(2000);
 		/* USER CODE END 3 */
 	  }

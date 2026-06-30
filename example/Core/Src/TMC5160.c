@@ -37,9 +37,15 @@ uint32_t TMC5160_ReadRegister(TMC5160_TypeDef *htmc, uint8_t reg_address)
     return TMC5160_SPI_Read(htmc, reg_address);
 }
 
-void TMC5160_Init(TMC5160_TypeDef *htmc)
+TMC5160_Status_TypeDef TMC5160_Init(TMC5160_TypeDef *htmc, const TMC5160_Config_TypeDef *cfg)
 {   
-    if (htmc == NULL) {return;}
+    if (htmc == NULL || cfg == NULL || cfg->hspi == NULL) {return TMC5160_BADARG;}
+
+    // Apply the user configurations
+    htmc->hspi    = cfg->hspi;
+    htmc->cs      = cfg->cs;
+    htmc->en      = cfg->en;
+    htmc->r_sense = (cfg->r_sense > 0.0f) ? cfg->r_sense : TMC5160_R_SENSE_DEFAULT;
 
     // Change htmc settings to default values
     htmc->irun = TMC5160_IRUN_DEFAULT;
@@ -47,9 +53,6 @@ void TMC5160_Init(TMC5160_TypeDef *htmc)
     htmc->microstep = TMC5160_MICROSTEP_DEFAULT;
     htmc->vmax = TMC5160_VMAX_DEFAULT;
     htmc->amax = TMC5160_AMAX_DEFAULT;
-    if (htmc->r_sense <= 0.0f) {
-        htmc->r_sense = TMC5160_R_SENSE_DEFAULT;
-    }
 
     // Setup motor direction (pg 32 & 33)
     TMC5160_WriteRegister(htmc, TMC5160_GCONF, (0UL << 4)); // Default = 0 , Inverse = 1
@@ -106,6 +109,8 @@ void TMC5160_Init(TMC5160_TypeDef *htmc)
     
     // Setup target position
     TMC5160_WriteRegister(htmc, TMC5160_XTARGET, TMC5160_POSITION_DEFAULT); // Default = 0
+
+    return TMC5160_OK;
 }
 
 TMC5160_Status_TypeDef TMC5160_SetCurrent(TMC5160_TypeDef *htmc, uint16_t current_ma)
@@ -141,12 +146,13 @@ TMC5160_Status_TypeDef TMC5160_SetCurrent(TMC5160_TypeDef *htmc, uint16_t curren
     return status;
 }
 
-void TMC5160_SetEN(TMC5160_TypeDef *htmc, GPIO_PinState state)
+TMC5160_Status_TypeDef TMC5160_SetEN(TMC5160_TypeDef *htmc, GPIO_PinState state)
 {
-    if (htmc == NULL || htmc->en.port == NULL) {return;}
+    if (htmc == NULL || htmc->en.port == NULL) {return TMC5160_BADARG;}
 
     // Pull EN Pin LOW or HIGH
     HAL_GPIO_WritePin(htmc->en.port, htmc->en.pin, state);
+    return TMC5160_OK;
 }
 
 TMC5160_Status_TypeDef TMC5160_SetRampMode(TMC5160_TypeDef *htmc, TMC5160_RampMode_TypeDef ramp_mode)
@@ -228,15 +234,16 @@ TMC5160_Status_TypeDef TMC5160_SetAcceleration(TMC5160_TypeDef *htmc, uint32_t m
     return status;
 }
 
-void TMC5160_MoveTo(TMC5160_TypeDef *htmc, int32_t position)
+TMC5160_Status_TypeDef TMC5160_MoveTo(TMC5160_TypeDef *htmc, int32_t position)
 {
-    if (htmc == NULL) {return;}
+    if (htmc == NULL) {return TMC5160_BADARG;}
 
     // -- Move the motor to a given position --
     // Set the ramp mode to position mode
     TMC5160_WriteRegister(htmc, TMC5160_RAMPMODE, TMC5160_RAMPMODE_POSITION);
     // Move the motor to position
     TMC5160_WriteRegister(htmc, TMC5160_XTARGET, position);
+    return TMC5160_OK;
 }
 
 int32_t TMC5160_GetPosition(TMC5160_TypeDef *htmc)

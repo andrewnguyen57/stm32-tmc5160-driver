@@ -50,18 +50,19 @@ Connect the SPI pins as shown and flash the `main.c` file in the example directo
 ```c
 #include "TMC5160.h"
 
-TMC5160_TypeDef tmc = {
+TMC5160_TypeDef htmc;
+const TMC5160_Config_TypeDef htmc_cfg = {
     .hspi    = &hspi1,
-    .cs      = { .port = GPIOB, .pin = GPIO_PIN_6 },
-    .en      = { .port = GPIOB, .pin = GPIO_PIN_5 },
+    .cs      = { .port = GPIOB, .pin = GPIO_PIN_6 }, // CS Pin
+    .en      = { .port = GPIOB, .pin = GPIO_PIN_5 }, // EN Pin
     .r_sense = 0.075f,   // board sense resistor in ohms
 };
 
 void motor_setup(void)
 {
-    TMC5160_Init(&tmc);                  // load default configuration
-    TMC5160_SetEN(&tmc, GPIO_PIN_RESET); // enable driver (EN is active-low)
-    TMC5160_MoveTo(&tmc, 51200);         // move to an absolute position
+    TMC5160_Init(&htmc, &htmc_cfg);       // load default configuration
+    TMC5160_SetEN(&htmc, GPIO_PIN_RESET); // enable driver
+    TMC5160_MoveTo(&htmc, 51200);         // move to an absolute position
 }
 ```
 
@@ -81,14 +82,14 @@ void motor_setup(void)
 
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `TMC5160_Init(htmc)` | `void` | Load the default configuration |
-| `TMC5160_SetEN(htmc, state)` | `void` | Drive the EN pin (`GPIO_PIN_RESET` = enabled) |
+| `TMC5160_Init(htmc, cfg)` | `Status` | Load the default configuration |
+| `TMC5160_SetEN(htmc, state)` | `Status` | Drive the EN pin (`GPIO_PIN_RESET` = enabled) |
 | `TMC5160_SetCurrent(htmc, current_ma)` | `Status` | Set run/hold current in milliamps |
 | `TMC5160_SetRampMode(htmc, mode)` | `Status` | Select ramp mode |
 | `TMC5160_SetMicrostep(htmc, microstep)` | `Status` | Set microstep resolution (1–256) |
 | `TMC5160_SetVelocity(htmc, vmax)` | `Status` | Set max velocity (`VMAX`) |
 | `TMC5160_SetAcceleration(htmc, amax)` | `Status` | Set max acceleration (`AMAX`) |
-| `TMC5160_MoveTo(htmc, position)` | `void` | Switch to position mode and move to target |
+| `TMC5160_MoveTo(htmc, position)` | `Status` | Switch to position mode and move to target |
 
 ### Readback
 
@@ -133,7 +134,7 @@ void motor_setup(void)
 
 ## License
 
-This project is licensed under the MIT License.
+- This project is licensed under the MIT License.
 
 ## Notes
 
