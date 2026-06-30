@@ -1,5 +1,10 @@
 # STM32 TMC5160 DRIVER LIBRARY
 
+![License](https://img.shields.io/badge/license-MIT-green)
+![Language](https://img.shields.io/badge/language-C-blue)
+![Platform](https://img.shields.io/badge/platform-STM32-orange)
+![Last Commit](https://img.shields.io/github/last-commit/andrewnguyen57/stm32-tmc5160-driver)
+
 A lightweight STM32 driver library for the TMC5160 stepper motor driver using SPI.
 
 This project is developed for the purpose of learning low-level development and out of necessity, it eventually evolved to a reusable library that anyone can use for the STM32 platform.
