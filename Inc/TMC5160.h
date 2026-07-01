@@ -30,7 +30,7 @@
 
 // Max 
 #define TMC5160_VMAX_MAX            0x007FFFFFUL
-#define TMC5160_AMAX_MAX            0x0003FFFFUL
+#define TMC5160_AMAX_MAX            0x0000FFFFUL
 
 // Math
 #define SQRT_TWO                    1.41421356f
@@ -130,7 +130,7 @@ TMC5160_Status_TypeDef TMC5160_SetRampMode(TMC5160_TypeDef *htmc, TMC5160_RampMo
 TMC5160_Status_TypeDef TMC5160_SetMicrostep(TMC5160_TypeDef *htmc, uint16_t microstep);
 TMC5160_Status_TypeDef TMC5160_SetVelocity(TMC5160_TypeDef *htmc, uint32_t max_velocity);
 TMC5160_Status_TypeDef TMC5160_SetAcceleration(TMC5160_TypeDef *htmc, uint32_t max_acceleration);
-void TMC5160_MoveTo(TMC5160_TypeDef *htmc, int32_t position);
+TMC5160_Status_TypeDef TMC5160_MoveTo(TMC5160_TypeDef *htmc, int32_t position);
 
 // - Read -
 int32_t TMC5160_GetPosition(TMC5160_TypeDef *htmc);

@@ -13,7 +13,7 @@ Reference TMC5160 Datasheet pg 32 - pg 49*/
 // -- Current --
 #define TMC5160_IHOLD_IRUN  0x10 // Driver current control
 #define TMC5160_TPOWERDOWN  0x11 // Set delay time after stand still to power down (0-4s)
-#define TMC5160_TPWMTHRS    0x13 // SpreadCycle/SteathChop
+#define TMC5160_TPWMTHRS    0x13 // SpreadCycle/StealthChop 
 #define TMC5160_TCOOLTHRS   0x14 // CoolStep / StallGuard threshold velocity
 
 // -- Ramp Generator --
