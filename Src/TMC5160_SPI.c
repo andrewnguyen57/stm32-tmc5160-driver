@@ -1,14 +1,14 @@
-/** 
-* @file TMC5160_SPI.c
-* @brief TMC5160 SPI Communication
-*
-* Author: Andrew Nguyen
-* Date: June 2026
-*
-* References:
-* Trinamic TMC5160 Datasheet (see docs)
-* Relevant datasheet page numbers are cited throughout the source code.
-*/
+/**
+ * @file    TMC5160_SPI.c
+ * @brief   TMC5160 SPI Communication
+ *
+ * Author: Andrew Nguyen
+ * Date:   June 2026
+ * 
+ * References:
+ * Trinamic TMC5160 Datasheet (see docs)
+ *  Relevant page numbers are cited throughout the source.
+ */
 
 #include "TMC5160_SPI.h"
 

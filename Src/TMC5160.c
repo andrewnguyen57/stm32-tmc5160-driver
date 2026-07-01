@@ -1,14 +1,14 @@
-/** 
-* @file TMC5160.c
-* @brief TMC5160 Stepper Driver Library
-*
-* Author: Andrew Nguyen
-* Date: June 2026
-*
-* References:
-* Trinamic TMC5160 Datasheet (see docs)
-*  Relevant page numbers are cited throughout the source.
-*/
+/**
+ * @file    TMC5160.c
+ * @brief   TMC5160 Stepper Driver Library
+ *
+ * Author: Andrew Nguyen
+ * Date:   June 2026
+ * 
+ * References:
+ * Trinamic TMC5160 Datasheet (see docs)
+ *  Relevant page numbers are cited throughout the source.
+ */
 
 #include "TMC5160.h"
 #include "TMC5160_SPI.h"
@@ -100,7 +100,7 @@ TMC5160_Status_TypeDef TMC5160_SetCurrent(TMC5160_TypeDef *htmc, uint16_t curren
         status = TMC5160_CLAMPED;
     }
     htmc->irun = (uint8_t)(cs + 0.5f);  // Round to nearest
-    htmc->ihold = htmc->irun / 2;       // IHOLD = IRUN/2
+    htmc->ihold = htmc->irun / 2; 
 
     // IHOLD_IRUN: IHOLD[4:0], IRUN[12:8], IHOLDDELAY[19:16]
     TMC5160_WriteRegister(htmc, TMC5160_IHOLD_IRUN, 
