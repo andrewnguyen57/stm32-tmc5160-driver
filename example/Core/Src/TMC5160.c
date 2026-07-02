@@ -272,3 +272,21 @@ TMC5160_GStat_TypeDef TMC5160_GetGStat(TMC5160_TypeDef *htmc)
 
     return data;
 }
+
+TMC5160_RampStat_TypeDef TMC5160_GetRampStat(TMC5160_TypeDef *htmc)
+{
+    if (htmc == NULL) {return (TMC5160_RampStat_TypeDef){0};}
+
+    uint32_t rampstat = TMC5160_ReadRegister(htmc, TMC5160_RAMPSTAT);
+
+    TMC5160_RampStat_TypeDef data = {
+        .status_sg = (rampstat >> 13) & 1,      // Stallguard flag
+        .vzero = (rampstat >> 10) & 1,          // Vactual = 0 flag
+        .position_reached = (rampstat >> 9) & 1
+        .velocity_reached = (rampstat >> 8) & 1,
+        .status_stop_r = (rampstat >> 1) & 1,   // Reference switch status right
+        .status_stop_l = (rampstat >> 0) & 1    // Reference switch status left
+    };
+
+    return data;
+}

@@ -121,6 +121,16 @@ typedef struct {
     uint8_t uv_cp;      /**< Undervoltage on charge pump */
 } TMC5160_GStat_TypeDef;
 
+/** @brief RAMP_STAT register */
+typedef struct {
+    uint8_t status_sg;          /**< StallGuard2 flag */
+    uint8_t vzero;              /**< Vactual is zero flag */
+    uint8_t position_reached;   /**< Position reached flag: 1 means Xtarget = Xactual */
+    uint8_t velocity_reached;   /**< Velocity reached flag: 1 means Vactual = Vmax */
+    uint8_t status_stop_r;       /**< Reference switch right status */
+    uint8_t status_stop_l;       /**< Reference switch left status */
+} TMC5160_RampStat_TypeDef;
+
 /**
  * @brief  Write a 32-bit value to a register and update the shadow cache
  * @param  htmc        Driver handle
@@ -242,9 +252,16 @@ TMC5160_DrvStat_TypeDef TMC5160_GetDrvStat(TMC5160_TypeDef *htmc);
 
 /**
  * @brief  Read and decode the GSTAT register (pg 33)
- * @param  htmc Driver handle.
+ * @param  htmc Driver handle
  * @return Decoded global status flags
  */
 TMC5160_GStat_TypeDef TMC5160_GetGStat(TMC5160_TypeDef *htmc);
+
+/**
+ * @brief Read and decode the RAMPSTAT register (pg 44)
+ * @param htmc Driver handle
+ * @return Decoded ramp status flags
+ */
+TMC5160_RampStat_TypeDef TMC5160_GetRampStat(TMC5160_TypeDef *htmc);
 
 #endif

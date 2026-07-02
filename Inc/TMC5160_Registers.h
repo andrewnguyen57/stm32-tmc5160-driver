@@ -32,6 +32,7 @@
 #define TMC5160_D1          0x2A // Deceleration between V1 and VSTOP
 #define TMC5160_VSTOP       0x2B // Motor stop velocity
 #define TMC5160_XTARGET     0x2D // Target position for position mode (signed)
+#define TMC5160_RAMPSTAT    0x35 // Ramp & Reference Switch Status Register 
 
 // -- Driver --
 #define TMC5160_CHOPCONF    0x6C // Chopper and driver configuration
