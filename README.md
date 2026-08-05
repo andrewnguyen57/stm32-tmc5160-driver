@@ -72,7 +72,7 @@ void motor_setup(void)
 ```
 
 ## Files
-
+ 
 | File | Purpose |
 |------|---------|
 | `TMC5160.h` | Public API, handle struct, enums, defaults |
@@ -80,11 +80,11 @@ void motor_setup(void)
 | `TMC5160_SPI.h` | SPI transport API |
 | `TMC5160_SPI.c` | SPI read/write datagram implementation |
 | `TMC5160_Registers.h` | TMC5160 register address map |
-
+ 
 ## API
-
+ 
 ### Control
-
+ 
 | Function | Returns | Description |
 |----------|---------|-------------|
 | `TMC5160_Init(htmc, cfg)` | `Status` | Load the default configuration |
@@ -94,51 +94,59 @@ void motor_setup(void)
 | `TMC5160_SetMicrostep(htmc, microstep)` | `Status` | Set microstep resolution (1–256) |
 | `TMC5160_SetVelocity(htmc, vmax)` | `Status` | Set max velocity (`VMAX`) |
 | `TMC5160_SetAcceleration(htmc, amax)` | `Status` | Set max acceleration (`AMAX`) |
-| `TMC5160_MoveTo(htmc, position)` | `Status` | Switch to position mode and move to target |
-
+ 
+### Motion
+ 
+| Function | Returns | Description |
+|----------|---------|-------------|
+| `TMC5160_MoveTo(htmc, position)` | `Status` | Switch to position mode and move to an absolute target |
+| `TMC5160_Stop(htmc)` | `Status` | Stop by targeting the current position; leaves the driver in position mode |
+| `TMC5160_SetPosition(htmc, position)` | `Status` | Redefine the current position without moving (homing). Call only at standstill |
+ 
 ### Readback
-
+ 
 | Function | Returns | Description |
 |----------|---------|-------------|
 | `TMC5160_GetPosition(htmc)` | `int32_t` | Actual position (`XACTUAL`) |
 | `TMC5160_GetVelocity(htmc)` | `int32_t` | Actual velocity (`VACTUAL`) |
+| `TMC5160_GetMaxVelocity(htmc)` | `uint32_t` | Configured `VMAX`, from the shadow cache |
+| `TMC5160_GetMaxAcceleration(htmc)` | `uint32_t` | Configured `AMAX`, from the shadow cache |
+| `TMC5160_GetMode(htmc)` | `RampMode` | Current ramp mode |
 | `TMC5160_GetIOIN(htmc)` | `IOIN` | Input pin states and chip version |
-| `TMC5160_GetDrvStat(htmc)` | `DrvStat` | Driver status flags |
-| `TMC5160_GetGStat(htmc)` | `GStat` | Global status flags |
-
+| `TMC5160_GetDrvStat(htmc)` | `DrvStat` | Driver status flags: shorts, open load, overtemp, StallGuard |
+| `TMC5160_GetGStat(htmc)` | `GStat` | Global status flags: reset, driver error, charge pump undervoltage |
+| `TMC5160_GetRampStat(htmc)` | `RampStat` | Motion flags: velocity zero, position/velocity reached, reference switches |
+ 
 ### Register access
-
+ 
 | Function | Returns | Description |
 |----------|---------|-------------|
 | `TMC5160_WriteRegister(htmc, reg, data)` | `void` | Write a 32-bit value and cache it |
 | `TMC5160_ReadRegister(htmc, reg)` | `uint32_t` | Read a 32-bit value |
-
+ 
 **Status codes:**
 - `TMC5160_OK`
 - `TMC5160_BADARG` (NULL/invalid argument)
-- `TMC5160_CLAMPED` (value out of range, clamped to the limit)
+- `TMC5160_CLAMPED` (value out of range, clamped to the limit and applied)
+- `TMC5160_ERR` (Communication failure)
 
 **Ramp modes:**
 - `TMC5160_RAMPMODE_POSITION`
 - `TMC5160_RAMPMODE_VEL_POS`
 - `TMC5160_RAMPMODE_VEL_NEG`
 - `TMC5160_RAMPMODE_HOLD`
-
 ## Related Projects
-
+ 
 - [Stepper Motor Library](https://github.com/andrewnguyen57/stepper-motor-driver): depends on this TMC5160 driver library.
 - [Robotic Chess Project](https://github.com/RoboticChessProject): the eventual goal of this project.
-
 ## Demo Video
-
+ 
 - https://youtube.com/shorts/sfI2iLDyZvg?feature=share
-
 ## Documentation
-
+ 
 - [TMC5160 Datasheet](docs/tmc5160a_datasheet_rev1.17.pdf)
-
 ## License
-
+ 
 - This project is licensed under the MIT License.
 
 ## Notes

@@ -14,6 +14,7 @@
 
 /** @name Handle defaults */
 ///@{
+#define TMC5160_IC_VERSION          0x30U           /**< Expected IOIN.VERSION of a TMC5160 */
 #define TMC5160_CHOPCONF_DEFAULT    0x000100C3UL
 #define TMC5160_IRUN_DEFAULT        20UL
 #define TMC5160_IHOLD_DEFAULT       10UL
@@ -41,7 +42,7 @@
 
 /** @name Register field limits */
 ///@{
-#define TMC5160_VMAX_MAX            0x007FFFFFUL     /**< VMAX: 23-bit */
+#define TMC5160_VMAX_MAX            0x007FFE00UL     /**< VMAX: 23-bit */
 #define TMC5160_AMAX_MAX            0x0000FFFFUL     /**< AMAX: 16-bit */
 ///@}
 
@@ -66,6 +67,7 @@ typedef enum {
     TMC5160_OK = 0,     /**< Success */
     TMC5160_BADARG,     /**< NULL handle or invalid argument */
     TMC5160_CLAMPED     /**< Success, but a value was clamped to its valid range */
+    TMC5160_ERR         /**< Communication failure: the chip did not respond as expected */
 } TMC5160_Status_TypeDef;
 
 /** @brief Driver handle */
@@ -214,6 +216,15 @@ TMC5160_Status_TypeDef TMC5160_SetVelocity(TMC5160_TypeDef *htmc, uint32_t max_v
 TMC5160_Status_TypeDef TMC5160_SetAcceleration(TMC5160_TypeDef *htmc, uint32_t max_acceleration);
 
 /**
+ * @brief Set the position of the shaft (XACTUAL)
+ * @param  htmc             Driver handle
+ * @param  position         New position in microsteps (signed)
+ * @retval TMC5160_OK     Position redefined
+ * @retval TMC5160_BADARG htmc was NULL
+ */
+TMC5160_Status_TypeDef TMC5160_SetPosition(TMC5160_TypeDef *hs, int32_t position);
+
+/**
  * @brief  Switch to position mode and move to an absolute target
  * @param  htmc     Driver handle
  * @param  position Target position in microsteps (signed)
@@ -221,6 +232,14 @@ TMC5160_Status_TypeDef TMC5160_SetAcceleration(TMC5160_TypeDef *htmc, uint32_t m
  * @retval TMC5160_BADARG htmc was NULL
  */
 TMC5160_Status_TypeDef TMC5160_MoveTo(TMC5160_TypeDef *htmc, int32_t position);
+
+/**
+ * @brief  Switch to position mode and stop
+ * @param  htmc     Driver handle
+ * @retval TMC5160_OK     Stop commanded
+ * @retval TMC5160_BADARG htmc was NULL
+ */
+TMC5160_Status_TypeDef TMC5160_Stop(TMC5160_TypeDef *htmc);
 
 /**
  * @brief  Read the actual position (XACTUAL)
@@ -235,6 +254,27 @@ int32_t TMC5160_GetPosition(TMC5160_TypeDef *htmc);
  * @return Velocity (signed)
  */
 int32_t TMC5160_GetVelocity(TMC5160_TypeDef *htmc);
+
+/**
+ * @brief Read the max ramp velocity (VMAX)
+ * @param htmc Driver handle
+ * @return Max velocity (unsigned)
+ */
+uint32_t TMC5160_GetMaxVelocity(TMC5160_TypeDef *htmc);
+
+/**
+ * @brief Read the max ramp acceleration (AMAX)
+ * @param htmc Driver handle
+ * @return Max acceleration (unsigned)
+ */
+uint32_t TMC5160_GetMaxAcceleration(TMC5160_TypeDef *htmc);
+
+/**
+ * @brief Read the current ramp mode
+ * @param htmc Driver handle
+ * @return ramp mode
+ */
+TMC5160_RampMode_TypeDef TMC5160_GetRampMode(TMC5160_TypeDef *htmc);
 
 /**
  * @brief  Read and decode the IOIN register (pg 34)

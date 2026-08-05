@@ -7,7 +7,7 @@
  * 
  * References:
  * Trinamic TMC5160 Datasheet (see docs)
- *  Relevant page numbers are cited throughout the source.
+ * Relevant page numbers are cited throughout the source.
  */
 
 #include "TMC5160.h"
@@ -51,6 +51,8 @@ TMC5160_Status_TypeDef TMC5160_Init(TMC5160_TypeDef *htmc, const TMC5160_Config_
     htmc->vmax      = TMC5160_VMAX_DEFAULT;
     htmc->amax      = TMC5160_AMAX_DEFAULT;
 
+    if (TMC5160_GetIOIN(htmc).version != TMC5160_IC_VERSION) {return TMC5160_ERR;}
+
     // --- Driver configuration ---
     TMC5160_WriteRegister(htmc, TMC5160_GCONF, (0UL << 4));                          // Normal direction, GCONF.shaft = 0 (pg 32-33)
     TMC5160_WriteRegister(htmc, TMC5160_CHOPCONF, TMC5160_CHOPCONF_DEFAULT);         // pg 51
@@ -77,6 +79,9 @@ TMC5160_Status_TypeDef TMC5160_Init(TMC5160_TypeDef *htmc, const TMC5160_Config_
     TMC5160_WriteRegister(htmc, TMC5160_XACTUAL, TMC5160_POSITION_DEFAULT);
     TMC5160_WriteRegister(htmc, TMC5160_XTARGET, TMC5160_POSITION_DEFAULT);
 
+    // --- Clear GStat (pg 33) --- 
+    // Because reset = 1 and uv_cp = 1 stuck at power on
+    TMC5160_WriteRegister(htmc, TMC5160_GSTAT, 0x07);
     return TMC5160_OK;
 }
 
@@ -194,12 +199,35 @@ TMC5160_Status_TypeDef TMC5160_SetAcceleration(TMC5160_TypeDef *htmc, uint32_t m
     return status;
 }
 
+TMC5160_Status_TypeDef TMC5160_SetPosition(TMC5160_TypeDef *htmc, int32_t position)
+{
+    if (htmc == NULL) {return TMC5160_BADARG;}
+
+    TMC5160_WriteRegister(htmc, TMC5160_RAMPMODE, TMC5160_RAMPMODE_HOLD);
+    TMC5160_WriteRegister(htmc, TMC5160_XTARGET, (uint32_t)position);
+    TMC5160_WriteRegister(htmc, TMC5160_XACTUAL, (uint32_t)position);
+    TMC5160_WriteRegister(htmc, TMC5160_RAMPMODE, TMC5160_RAMPMODE_POSITION);
+
+    return TMC5160_OK;
+}
+
 TMC5160_Status_TypeDef TMC5160_MoveTo(TMC5160_TypeDef *htmc, int32_t position)
 {
     if (htmc == NULL) {return TMC5160_BADARG;}
     // Force POSITION MODE and move the motor to target position
     TMC5160_WriteRegister(htmc, TMC5160_RAMPMODE, TMC5160_RAMPMODE_POSITION);
     TMC5160_WriteRegister(htmc, TMC5160_XTARGET, position);
+    return TMC5160_OK;
+}
+
+TMC5160_Status_TypeDef TMC5160_Stop(TMC5160_TypeDef *htmc)
+{
+    if (htmc == NULL) {return TMC5160_BADARG;}
+    int32_t position = (int32_t)TMC5160_ReadRegister(htmc, TMC5160_XACTUAL);
+
+    TMC5160_SetRampMode(htmc, TMC5160_RAMPMODE_POSITION);
+    TMC5160_WriteRegister(htmc, TMC5160_XTARGET, position);
+
     return TMC5160_OK;
 }
 
@@ -221,6 +249,29 @@ int32_t TMC5160_GetVelocity(TMC5160_TypeDef *htmc)
     }
 
     return (int32_t)data;
+}
+
+uint32_t TMC5160_GetMaxVelocity(TMC5160_TypeDef *htmc)
+{
+    if (htmc == NULL) {return 0;}
+
+    return htmc->vmax;
+}
+
+uint32_t TMC5160_GetMaxAcceleration(TMC5160_TypeDef *htmc)
+{
+    if (htmc == NULL) {return 0;}
+
+    return htmc->amax;
+}
+
+TMC5160_RampMode_TypeDef TMC5160_GetRampMode(TMC5160_TypeDef *htmc) 
+{
+    if (htmc == NULL) {return TMC5160_RAMPMODE_POSITION;}
+
+    uint32_t rampmode = TMC5160_ReadRegister(htmc, TMC5160_RAMPMODE);
+
+    return (TMC5160_RampMode_TypeDef)(rampmode & 0x03U);
 }
 
 TMC5160_IOIN_TypeDef TMC5160_GetIOIN(TMC5160_TypeDef *htmc)
@@ -277,12 +328,12 @@ TMC5160_RampStat_TypeDef TMC5160_GetRampStat(TMC5160_TypeDef *htmc)
 {
     if (htmc == NULL) {return (TMC5160_RampStat_TypeDef){0};}
 
-    uint32_t rampstat = TMC5160_ReadRegister(htmc, TMC5160_RAMPSTAT);
+    uint32_t rampstat = TMC5160_ReadRegister(htmc, TMC5160_RAMPSTAT); // (pg 44)
 
     TMC5160_RampStat_TypeDef data = {
         .status_sg = (rampstat >> 13) & 1,      // Stallguard flag
         .vzero = (rampstat >> 10) & 1,          // Vactual = 0 flag
-        .position_reached = (rampstat >> 9) & 1
+        .position_reached = (rampstat >> 9) & 1,
         .velocity_reached = (rampstat >> 8) & 1,
         .status_stop_r = (rampstat >> 1) & 1,   // Reference switch status right
         .status_stop_l = (rampstat >> 0) & 1    // Reference switch status left
