@@ -225,8 +225,8 @@ TMC5160_Status_TypeDef TMC5160_Stop(TMC5160_TypeDef *htmc)
     if (htmc == NULL) {return TMC5160_BADARG;}
     int32_t position = (int32_t)TMC5160_ReadRegister(htmc, TMC5160_XACTUAL);
 
-    TMC5160_SetRampMode(htmc, TMC5160_RAMPMODE_POSITION);
     TMC5160_WriteRegister(htmc, TMC5160_XTARGET, position);
+    TMC5160_SetRampMode(htmc, TMC5160_RAMPMODE_POSITION);
 
     return TMC5160_OK;
 }

@@ -25,7 +25,7 @@
 /** @name Register defaults */
 ///@{
 #define TMC5160_GLOBALSCALER_DEFAULT 0x00000000UL   /**< 0 = full scale (256) */
-#define TMC5160_IRUNIHOLD_DEFAULT   0x0006140AUL
+#define TMC5160_IRUNIHOLD_DEFAULT   0x00060A05UL    /**< IHOLD = 5, IRUN = 10, IHOLDDELAY = 6 */
 #define TMC5160_TPOWERDOWN_DEFAULT  0x0000000AUL     /**< 10 */
 #define TMC5160_TPWMTHRS_DEFAULT    0x000001F4UL     /**< 500 */
 #define TMC5160_PWMCONF_DEFAULT     0xC10D0024UL
@@ -66,7 +66,7 @@ typedef enum {
 typedef enum {
     TMC5160_OK = 0,     /**< Success */
     TMC5160_BADARG,     /**< NULL handle or invalid argument */
-    TMC5160_CLAMPED     /**< Success, but a value was clamped to its valid range */
+    TMC5160_CLAMPED,     /**< Success, but a value was clamped to its valid range */
     TMC5160_ERR         /**< Communication failure: the chip did not respond as expected */
 } TMC5160_Status_TypeDef;
 
@@ -222,7 +222,7 @@ TMC5160_Status_TypeDef TMC5160_SetAcceleration(TMC5160_TypeDef *htmc, uint32_t m
  * @retval TMC5160_OK     Position redefined
  * @retval TMC5160_BADARG htmc was NULL
  */
-TMC5160_Status_TypeDef TMC5160_SetPosition(TMC5160_TypeDef *hs, int32_t position);
+TMC5160_Status_TypeDef TMC5160_SetPosition(TMC5160_TypeDef *htmc, int32_t position);
 
 /**
  * @brief  Switch to position mode and move to an absolute target

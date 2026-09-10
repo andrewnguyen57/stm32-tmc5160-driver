@@ -135,16 +135,20 @@ void motor_setup(void)
 - `TMC5160_RAMPMODE_VEL_POS`
 - `TMC5160_RAMPMODE_VEL_NEG`
 - `TMC5160_RAMPMODE_HOLD`
+
 ## Related Projects
- 
+
+- [Robotic Chess Project](https://github.com/andrewnguyen57/stm32-chess-arm): the eventual goal of this project.
 - [Stepper Motor Library](https://github.com/andrewnguyen57/stepper-motor-driver): depends on this TMC5160 driver library.
-- [Robotic Chess Project](https://github.com/RoboticChessProject): the eventual goal of this project.
+
 ## Demo Video
  
 - https://youtube.com/shorts/sfI2iLDyZvg?feature=share
+
 ## Documentation
  
 - [TMC5160 Datasheet](docs/tmc5160a_datasheet_rev1.17.pdf)
+
 ## License
  
 - This project is licensed under the MIT License.
